@@ -1,18 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rapido/screens/ClientsPage.dart';
 import 'package:rapido/screens/HomePage.dart';
 import 'package:rapido/screens/RegisterPage.dart';
-import 'AuthenticationService.dart';
+import 'service/AuthenticationService.dart';
 import 'AuthenticationWrapper.dart';
-import 'firebase_options.dart';
- import 'screens/login_page.dart';
+ import 'firebase_options.dart';
+import 'screens/login_page.dart';
 
-Future<void> main() async {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensures that Flutter bindings are initialized
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const RapidoApp());
+  );  runApp(const RapidoApp());
 }
 
 class RapidoApp extends StatelessWidget {
@@ -36,6 +38,7 @@ class RapidoApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const AuthenticationWrapper(),
+          '/clients': (context) => const ClientsPage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const RegisterPage(),
           '/home': (context) => const HomePage(),

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "673144332347",
+    "firebase_url": "https://rapido-571-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "rapido-571",
     "storage_bucket": "rapido-571.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.xdev.rapido"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "673144332347-8sn2ar08o2if7ca4nf403euti8qgavb6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDvefDXcvFHWnsVEXRBaj_GRZbSINCclV4"
@@ -20,7 +26,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "673144332347-8sn2ar08o2if7ca4nf403euti8qgavb6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

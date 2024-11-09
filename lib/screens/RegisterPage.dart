@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../AuthenticationService.dart';
+import '../service/AuthenticationService.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
