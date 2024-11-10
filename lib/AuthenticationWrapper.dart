@@ -1,8 +1,8 @@
 
+import 'package:Rappido/screens/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rapido/screens/HomePage.dart';
- import 'screens/login_page.dart';
+import 'screens/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthenticationWrapper extends StatelessWidget {

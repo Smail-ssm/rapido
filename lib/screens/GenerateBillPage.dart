@@ -1,8 +1,8 @@
 // lib/screens/generate_bill_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:rapido/util/utils.dart';
-import '../model/Client.dart';
+ import '../model/Client.dart';
+import '../util/utils.dart';
 
 class Product {
   final String name;

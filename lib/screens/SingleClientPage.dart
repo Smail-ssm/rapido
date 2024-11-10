@@ -1,13 +1,13 @@
 // lib/screens/single_client_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:rapido/screens/GenerateBillPage.dart';
-import 'package:rapido/screens/SingleBillPage.dart';
-import 'package:rapido/util/utils.dart';
-import '../model/Client.dart';
+   import '../model/Client.dart';
 import '../model/PrintedArticle.dart';
 import '../model/bill.dart';
+import '../util/utils.dart';
 import '../widgets/BillHistoryItem.dart';
+import 'GenerateBillPage.dart';
+import 'SingleBillPage.dart';
 
 class SingleClientPage extends StatefulWidget {
   final Client client;

@@ -43,7 +43,7 @@ dependencies:
   flutter_expandable_fab: ^2.3.0
   firebase_database: ^11.1.5
   esc_pos_utils: ^1.0.0
-  permission_handler: ^10.2.0
+  permission_handler: ^11.3.1
   pdf: ^3.8.4
   esc_pos_bluetooth: ^0.4.1
   open_file: ^3.5.9

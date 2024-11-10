@@ -3,18 +3,55 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../service/AuthenticationService.dart';
 import '../util/utils.dart';
 import '../widgets/dashboard_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.location,
+    ].request();
+
+    bool allGranted = statuses.values.every((status) => status.isGranted);
+
+    if (!allGranted) {
+      // If permissions are denied, show a dialog or a snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Bluetooth and Location permissions are required to use this feature.',
+          ),
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: () => openAppSettings(),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final AuthenticationService authService =
-        Provider.of<AuthenticationService>(context, listen: false);
+    Provider.of<AuthenticationService>(context, listen: false);
 
     // Firebase Database references
     final DatabaseReference clientsRef = FirebaseDatabase.instance
@@ -65,7 +102,7 @@ class HomePage extends StatelessWidget {
                       if (snapshot.hasData &&
                           snapshot.data!.snapshot.value != null) {
                         final clientsMap = snapshot.data!.snapshot.value
-                            as Map<dynamic, dynamic>;
+                        as Map<dynamic, dynamic>;
                         final int clientCount = clientsMap.length;
                         return GestureDetector(
                           onTap: () => Navigator.pushNamed(context, '/clients'),
@@ -103,20 +140,20 @@ class HomePage extends StatelessWidget {
                       if (snapshot.hasData &&
                           snapshot.data!.snapshot.value != null) {
                         final deliveriesMap = snapshot.data!.snapshot.value
-                            as Map<dynamic, dynamic>;
+                        as Map<dynamic, dynamic>;
                         final int deliveriesCount = deliveriesMap.length;
                         return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/clients'),
+                          onTap: () => Navigator.pushNamed(context, '/deliveries'),
                           child: DashboardCard(
-                            title: "Total Clients",
+                            title: "Total Deliveries",
                             value: deliveriesCount.toString(),
-                            icon: Icons.people,
+                            icon: Icons.delivery_dining,
                           ),
                         );
                       } else {
                         return GestureDetector(
                             onTap: () =>
-                                Navigator.pushNamed(context, '/clients'),
+                                Navigator.pushNamed(context, '/deliveries'),
                             child: DashboardCard(
                               title: "Total Deliveries",
                               value: "0",
@@ -141,12 +178,12 @@ class HomePage extends StatelessWidget {
                       if (snapshot.hasData &&
                           snapshot.data!.snapshot.value != null) {
                         final deliveriesMap = snapshot.data!.snapshot.value
-                            as Map<dynamic, dynamic>;
+                        as Map<dynamic, dynamic>;
                         double totalRevenue = 0.0;
 
                         deliveriesMap.forEach((key, value) {
                           final revenue =
-                              (value as Map<dynamic, dynamic>)['revenue'];
+                          (value as Map<dynamic, dynamic>)['revenue'];
                           if (revenue != null) {
                             totalRevenue +=
                                 double.tryParse(revenue.toString()) ?? 0.0;
@@ -166,6 +203,16 @@ class HomePage extends StatelessWidget {
                         );
                       }
                     },
+                  ),
+
+                  // Settings Card
+                  GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/settings'),
+                    child: const DashboardCard(
+                      title: "Settings",
+                      value: "",
+                      icon: Icons.settings,
+                    ),
                   ),
                 ],
               ),

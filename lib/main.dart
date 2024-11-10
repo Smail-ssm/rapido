@@ -1,9 +1,10 @@
+import 'package:Rappido/screens/SettingsPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rapido/screens/ClientsPage.dart';
-import 'package:rapido/screens/HomePage.dart';
-import 'package:rapido/screens/RegisterPage.dart';
+import 'package:Rappido/screens/ClientsPage.dart';
+import 'package:Rappido/screens/HomePage.dart';
+import 'package:Rappido/screens/RegisterPage.dart';
 import 'service/AuthenticationService.dart';
 import 'AuthenticationWrapper.dart';
  import 'firebase_options.dart';
@@ -41,6 +42,7 @@ class RapidoApp extends StatelessWidget {
           '/clients': (context) => const ClientsPage(),
           '/login': (context) => const LoginPage(),
           '/register': (context) => const RegisterPage(),
+          '/settings': (context) => const SettingsPage(),
           '/home': (context) => const HomePage(),
         },
       ),
