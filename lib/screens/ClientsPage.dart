@@ -1,4 +1,3 @@
-// lib/screens/clients_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../model/Client.dart';
@@ -24,7 +23,9 @@ class _ClientsPageState extends State<ClientsPage> {
   @override
   void initState() {
     super.initState();
-    _clientsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath()).child('clients');
+    _clientsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath())
+        .child('users')
+        .child(Utils.getDatabasePath()).child('clients');
     _searchController.addListener(_filterClients);
   }
 
@@ -79,7 +80,7 @@ class _ClientsPageState extends State<ClientsPage> {
             hintText: 'Search by name, social reason, or phone',
             border: InputBorder.none,
           ),
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         )
             : const Text('Clients'),
         actions: [

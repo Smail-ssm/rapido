@@ -24,7 +24,9 @@ class GenerateBillPage extends StatefulWidget {
 }
 
 class _GenerateBillPageState extends State<GenerateBillPage> {
-  final DatabaseReference _billsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath()).child('bills');
+  final DatabaseReference _billsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath())
+        .child('users')
+        .child(Utils.getDatabasePath()).child('bills');
   final List<Product> _products = [];
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();

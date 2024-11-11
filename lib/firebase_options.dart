@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -36,10 +33,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -57,6 +51,28 @@ class DefaultFirebaseOptions {
     appId: '1:673144332347:android:04bfc0520750b8c864fc1e',
     messagingSenderId: '673144332347',
     projectId: 'rapido-571',
+    databaseURL: 'https://rapido-571-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'rapido-571.firebasestorage.app',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyD_s2Z3nkRG32izbwjA7OVbtxBTRgAUU4k',
+    appId: '1:673144332347:web:b914e3d40bc2d80764fc1e',
+    messagingSenderId: '673144332347',
+    projectId: 'rapido-571',
+    authDomain: 'rapido-571.firebaseapp.com',
+    databaseURL: 'https://rapido-571-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'rapido-571.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyD_s2Z3nkRG32izbwjA7OVbtxBTRgAUU4k',
+    appId: '1:673144332347:web:e9124d59c8af5c2e64fc1e',
+    messagingSenderId: '673144332347',
+    projectId: 'rapido-571',
+    authDomain: 'rapido-571.firebaseapp.com',
+    databaseURL: 'https://rapido-571-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: 'rapido-571.firebasestorage.app',
+  );
+
 }

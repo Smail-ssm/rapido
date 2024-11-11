@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "673144332347-p61r8b3ffl0kmrseejn1q7lt21ms6ho8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xdev.rapido",
+            "certificate_hash": "87c6cf3b5f42b78fe841d59e46f8728ecc912b1b"
+          }
+        },
+        {
           "client_id": "673144332347-8sn2ar08o2if7ca4nf403euti8qgavb6.apps.googleusercontent.com",
           "client_type": 3
         }

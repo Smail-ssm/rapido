@@ -1,4 +1,5 @@
 // lib/screens/home_page.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
@@ -17,11 +18,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   @override
   void initState() {
     super.initState();
-    _requestPermissions();
+     _requestPermissions();
   }
+
+
 
   Future<void> _requestPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
@@ -33,7 +37,6 @@ class _HomePageState extends State<HomePage> {
     bool allGranted = statuses.values.every((status) => status.isGranted);
 
     if (!allGranted) {
-      // If permissions are denied, show a dialog or a snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -53,15 +56,18 @@ class _HomePageState extends State<HomePage> {
     final AuthenticationService authService =
     Provider.of<AuthenticationService>(context, listen: false);
 
-    // Firebase Database references
+    // Firebase Database references for the connected user's clients and products
     final DatabaseReference clientsRef = FirebaseDatabase.instance
-        .ref()
+        .ref().child(Utils.getDatabasePath())
+        .child('users')
         .child(Utils.getDatabasePath())
         .child('clients');
-    final DatabaseReference deliveriesRef = FirebaseDatabase.instance
-        .ref()
+
+    final DatabaseReference productsRef = FirebaseDatabase.instance
+        .ref().child(Utils.getDatabasePath())
+        .child('users')
         .child(Utils.getDatabasePath())
-        .child('deliveries');
+        .child('products'); // Reference for the user's products
 
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +76,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await authService.signOut();
+              await authService.signOut(context);
               Navigator.pushReplacementNamed(context, '/login');
             },
             tooltip: 'Sign Out',
@@ -114,105 +120,53 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else {
                         return GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/clients'),
-                            child: DashboardCard(
-                              title: "Total Clients",
-                              value: "0",
-                              icon: Icons.people,
-                            ));
+                          onTap: () => Navigator.pushNamed(context, '/clients'),
+                          child: DashboardCard(
+                            title: "Total Clients",
+                            value: "0",
+                            icon: Icons.people,
+                          ),
+                        );
                       }
                     },
                   ),
 
-                  // Total Deliveries Card
+                  // Total Products Card (Stock)
                   StreamBuilder(
-                    stream: deliveriesRef.onValue,
+                    stream: productsRef.onValue,
                     builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const DashboardCard(
-                          title: "Total Deliveries",
+                          title: "Total Products",
                           value: "Loading...",
-                          icon: Icons.delivery_dining,
+                          icon: Icons.inventory,
                         );
                       }
 
                       if (snapshot.hasData &&
                           snapshot.data!.snapshot.value != null) {
-                        final deliveriesMap = snapshot.data!.snapshot.value
+                        final productsMap = snapshot.data!.snapshot.value
                         as Map<dynamic, dynamic>;
-                        final int deliveriesCount = deliveriesMap.length;
+                        final int productCount = productsMap.length;
                         return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/deliveries'),
+                          onTap: () => Navigator.pushNamed(context, '/products'),
                           child: DashboardCard(
-                            title: "Total Deliveries",
-                            value: deliveriesCount.toString(),
-                            icon: Icons.delivery_dining,
+                            title: "Total Products",
+                            value: productCount.toString(),
+                            icon: Icons.inventory,
                           ),
                         );
                       } else {
                         return GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/deliveries'),
-                            child: DashboardCard(
-                              title: "Total Deliveries",
-                              value: "0",
-                              icon: Icons.delivery_dining,
-                            ));
-                      }
-                    },
-                  ),
-
-                  // Revenue Card
-                  StreamBuilder(
-                    stream: deliveriesRef.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const DashboardCard(
-                          title: "Revenue",
-                          value: "Loading...",
-                          icon: Icons.attach_money,
-                        );
-                      }
-
-                      if (snapshot.hasData &&
-                          snapshot.data!.snapshot.value != null) {
-                        final deliveriesMap = snapshot.data!.snapshot.value
-                        as Map<dynamic, dynamic>;
-                        double totalRevenue = 0.0;
-
-                        deliveriesMap.forEach((key, value) {
-                          final revenue =
-                          (value as Map<dynamic, dynamic>)['revenue'];
-                          if (revenue != null) {
-                            totalRevenue +=
-                                double.tryParse(revenue.toString()) ?? 0.0;
-                          }
-                        });
-
-                        return DashboardCard(
-                          title: "Revenue",
-                          value: "\$${totalRevenue.toStringAsFixed(2)}",
-                          icon: Icons.attach_money,
-                        );
-                      } else {
-                        return const DashboardCard(
-                          title: "Revenue",
-                          value: "\$0.00",
-                          icon: Icons.attach_money,
+                          onTap: () => Navigator.pushNamed(context, '/products'),
+                          child: DashboardCard(
+                            title: "Total Products",
+                            value: "0",
+                            icon: Icons.inventory,
+                          ),
                         );
                       }
                     },
-                  ),
-
-                  // Settings Card
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/settings'),
-                    child: const DashboardCard(
-                      title: "Settings",
-                      value: "",
-                      icon: Icons.settings,
-                    ),
                   ),
                 ],
               ),
@@ -234,20 +188,12 @@ class _HomePageState extends State<HomePage> {
             child: const Icon(Icons.person_add),
           ),
           FloatingActionButton.small(
-            heroTag: 'addBill',
+            heroTag: 'addProduct',
             onPressed: () {
-              Navigator.pushNamed(context, '/addBill');
+              Navigator.pushNamed(context, '/addProduct');
             },
-            tooltip: 'Add Bill',
-            child: const Icon(Icons.receipt_long),
-          ),
-          FloatingActionButton.small(
-            heroTag: 'otherAction',
-            onPressed: () {
-              // Add other actions here
-            },
-            tooltip: 'Other Action',
-            child: const Icon(Icons.more_horiz),
+            tooltip: 'Add Product',
+            child: const Icon(Icons.inventory),
           ),
         ],
       ),

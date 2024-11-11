@@ -16,7 +16,9 @@ class _AddClientFormState extends State<AddClientForm> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
 
-  final DatabaseReference _clientsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath()).child('clients');
+  final DatabaseReference _clientsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath())
+        .child('users')
+        .child(Utils.getDatabasePath()).child('clients');
 
   Future<void> _saveClient() async {
     if (_formKey.currentState!.validate()) {
