@@ -28,6 +28,7 @@ class _SingleClientPageState extends State<SingleClientPage> {
     _billsRef = FirebaseDatabase.instance
         .ref()
         .child(Utils.getDatabasePath())
+        .child('sari3')
         .child('bills')
         .child(widget.client.id);
     _fetchBills();

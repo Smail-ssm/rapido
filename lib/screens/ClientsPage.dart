@@ -24,7 +24,11 @@ class _ClientsPageState extends State<ClientsPage> {
   @override
   void initState() {
     super.initState();
-    _clientsRef = FirebaseDatabase.instance.ref().child(Utils.getDatabasePath()).child('clients');
+    _clientsRef = FirebaseDatabase.instance
+        .ref()
+        .child(Utils.getDatabasePath())
+        .child('sari3')
+        .child('clients');
     _searchController.addListener(_filterClients);
   }
 
@@ -73,14 +77,14 @@ class _ClientsPageState extends State<ClientsPage> {
       appBar: AppBar(
         title: _isSearching
             ? TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search by name, social reason, or phone',
-            border: InputBorder.none,
-          ),
-          style: const TextStyle(color: Colors.black),
-        )
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search by name, social reason, or phone',
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(color: Colors.black),
+              )
             : const Text('Clients'),
         actions: [
           IconButton(
@@ -111,15 +115,16 @@ class _ClientsPageState extends State<ClientsPage> {
 
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
             final Map<dynamic, dynamic> clientsMap =
-            snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+                snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
 
             _clients = clientsMap.entries
                 .map((entry) => Client.fromMap(entry.key, entry.value))
                 .toList();
 
-            _filteredClients = _filteredClients.isEmpty && _searchController.text.isEmpty
-                ? _clients
-                : _filteredClients;
+            _filteredClients =
+                _filteredClients.isEmpty && _searchController.text.isEmpty
+                    ? _clients
+                    : _filteredClients;
 
             if (_filteredClients.isEmpty) {
               return const Center(child: Text("No clients found."));
@@ -153,7 +158,8 @@ class _ClientsPageState extends State<ClientsPage> {
                   duration: Duration(seconds: 3),
                 ),
               );
-              _showAddClientBottomSheet(context); // Automatically open Add Client form
+              _showAddClientBottomSheet(
+                  context); // Automatically open Add Client form
             });
 
             return const Center(child: Text("No clients found."));

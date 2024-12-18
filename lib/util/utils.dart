@@ -1,6 +1,7 @@
 // lib/utils/utils.dart
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Utils {
   /// Generates a unique ID by combining a timestamp with random numbers.
@@ -17,5 +18,9 @@ class Utils {
     } else {
       return 'prod';
     }
+  }
+ static Future<String?> getUserID() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userID');
   }
 }

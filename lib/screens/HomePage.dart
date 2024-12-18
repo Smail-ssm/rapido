@@ -2,10 +2,8 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
-import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../service/AuthenticationService.dart';
 import '../util/utils.dart';
 import '../widgets/dashboard_card.dart';
 
@@ -50,31 +48,36 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final AuthenticationService authService =
-    Provider.of<AuthenticationService>(context, listen: false);
 
     // Firebase Database references
     final DatabaseReference clientsRef = FirebaseDatabase.instance
         .ref()
         .child(Utils.getDatabasePath())
+        .child('sari3')
         .child('clients');
     final DatabaseReference deliveriesRef = FirebaseDatabase.instance
         .ref()
         .child(Utils.getDatabasePath())
+        .child('sari3')
         .child('deliveries');
+    final DatabaseReference productsRef = FirebaseDatabase.instance
+        .ref()
+        .child(Utils.getDatabasePath())
+        .child('sari3')
+        .child('products');
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await authService.signOut();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            tooltip: 'Sign Out',
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.logout),
+          //   onPressed: () async {
+          //     await authService.signOut(context);
+          //     Navigator.pushReplacementNamed(context, '/login');
+          //   },
+          //   tooltip: 'Sign Out',
+          // ),
         ],
       ),
       body: Padding(
@@ -99,10 +102,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
 
-                      if (snapshot.hasData &&
-                          snapshot.data!.snapshot.value != null) {
-                        final clientsMap = snapshot.data!.snapshot.value
-                        as Map<dynamic, dynamic>;
+                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                        final clientsMap =
+                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
                         final int clientCount = clientsMap.length;
                         return GestureDetector(
                           onTap: () => Navigator.pushNamed(context, '/clients'),
@@ -114,13 +116,13 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else {
                         return GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/clients'),
-                            child: DashboardCard(
-                              title: "Total Clients",
-                              value: "0",
-                              icon: Icons.people,
-                            ));
+                          onTap: () => Navigator.pushNamed(context, '/clients'),
+                          child: DashboardCard(
+                            title: "Total Clients",
+                            value: "0",
+                            icon: Icons.people,
+                          ),
+                        );
                       }
                     },
                   ),
@@ -137,10 +139,9 @@ class _HomePageState extends State<HomePage> {
                         );
                       }
 
-                      if (snapshot.hasData &&
-                          snapshot.data!.snapshot.value != null) {
-                        final deliveriesMap = snapshot.data!.snapshot.value
-                        as Map<dynamic, dynamic>;
+                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                        final deliveriesMap =
+                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
                         final int deliveriesCount = deliveriesMap.length;
                         return GestureDetector(
                           onTap: () => Navigator.pushNamed(context, '/deliveries'),
@@ -152,13 +153,13 @@ class _HomePageState extends State<HomePage> {
                         );
                       } else {
                         return GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/deliveries'),
-                            child: DashboardCard(
-                              title: "Total Deliveries",
-                              value: "0",
-                              icon: Icons.delivery_dining,
-                            ));
+                          onTap: () => Navigator.pushNamed(context, '/deliveries'),
+                          child: DashboardCard(
+                            title: "Total Deliveries",
+                            value: "0",
+                            icon: Icons.delivery_dining,
+                          ),
+                        );
                       }
                     },
                   ),
@@ -204,6 +205,42 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
+// Total Clients Card
+                  StreamBuilder(
+                    stream: productsRef.onValue,
+                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const DashboardCard(
+                          title: "Products",
+                          value: "Loading...",
+                          icon: Icons.shopping_cart,
+                        );
+                      }
+
+                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                        final productsMap =
+                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+                        final int clientCount = productsMap.length;
+                        return GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/products'),
+                          child: DashboardCard(
+                            title: "Products",
+                            value: clientCount.toString(),
+                            icon: Icons.inventory,
+                          ),
+                        );
+                      } else {
+                        return GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/products'),
+                          child: DashboardCard(
+                            title: "Products",
+                            value: "0",
+                            icon: Icons.inventory,
+                          ),
+                        );
+                      }
+                    },
+                  ),
 
                   // Settings Card
                   GestureDetector(
@@ -216,6 +253,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
+
             ),
           ],
         ),
