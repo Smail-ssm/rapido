@@ -15,7 +15,9 @@ class _AddProductFormState extends State<AddProductForm> {
   final _categoryController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
-   final DatabaseReference _productsRef = FirebaseDatabase.instance
+  final _barcodeController = TextEditingController();
+
+  final DatabaseReference _productsRef = FirebaseDatabase.instance
       .ref()
       .child(Utils.getDatabasePath())
       .child('sari3')
@@ -28,63 +30,86 @@ class _AddProductFormState extends State<AddProductForm> {
     _categoryController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
-     super.dispose();
+    _barcodeController.dispose();
+    super.dispose();
   }
 
-  void _addProduct() {
+  Future<void> _addProduct() async {
     if (_formKey.currentState!.validate()) {
       final newProduct = {
-        'name': _nameController.text,
-        'description': _descriptionController.text,
-        'category': _categoryController.text,
-        'price': double.parse(_priceController.text),
-        'quantity': int.parse(_quantityController.text),
-         'addedDate': DateTime.now().toIso8601String(),
+        'name': _nameController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'category': _categoryController.text.trim(),
+        'price': double.parse(_priceController.text.trim()),
+        'quantity': int.parse(_quantityController.text.trim()),
+        'barcode': _barcodeController.text.trim(),
+        'addedDate': DateTime.now().toIso8601String(),
       };
 
-      _productsRef.push().set(newProduct).then((_) {
-        Navigator.pop(context);
+      try {
+        await _productsRef.push().set(newProduct);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Product added successfully!')),
         );
-      }).catchError((error) {
+        Navigator.pop(context);
+      } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add product.')),
+          SnackBar(content: Text('Failed to add product: $error')),
         );
-      });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const Text(
+              'Add Product',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Product Name'),
+              decoration: const InputDecoration(
+                labelText: 'Product Name',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) =>
               value == null || value.isEmpty ? 'Name is required' : null,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
               maxLines: 3,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _categoryController,
-              decoration: const InputDecoration(labelText: 'Category'),
-              validator: (value) => value == null || value.isEmpty
-                  ? 'Category is required'
-                  : null,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) =>
+              value == null || value.isEmpty ? 'Category is required' : null,
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _priceController,
-              decoration: const InputDecoration(labelText: 'Price'),
-              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Price',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Price is required';
@@ -95,9 +120,13 @@ class _AddProductFormState extends State<AddProductForm> {
                 return null;
               },
             ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _quantityController,
-              decoration: const InputDecoration(labelText: 'Quantity'),
+              decoration: const InputDecoration(
+                labelText: 'Quantity',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -109,7 +138,16 @@ class _AddProductFormState extends State<AddProductForm> {
                 return null;
               },
             ),
-
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _barcodeController,
+              decoration: const InputDecoration(
+                labelText: 'Barcode',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) =>
+              value == null || value.isEmpty ? 'Barcode is required' : null,
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _addProduct,

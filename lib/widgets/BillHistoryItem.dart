@@ -1,4 +1,3 @@
-// lib/widgets/bill_history_item.dart
 import 'package:flutter/material.dart';
 
 class BillHistoryItem extends StatelessWidget {
@@ -24,19 +23,74 @@ class BillHistoryItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          title: Text('Date: $date'),
-          subtitle: Text('Amount: \$${totalAmount.toStringAsFixed(2)}\nDescription: $description'),
-          trailing: IconButton(
-            icon: const Icon(Icons.print),
-            color: Colors.blue,
-            tooltip: 'Print Bill',
-            onPressed: onPrint,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date and Vendor
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Date: $date',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Vendor: $vendor',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Total Amount
+              Text(
+                'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Description
+              Text(
+                'Description: $description',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.print),
+                    color: Colors.blue,
+                    tooltip: 'Print Bill',
+                    onPressed: onPrint,
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: onTap,
+                    child: const Text('View Details'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

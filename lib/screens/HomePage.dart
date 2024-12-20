@@ -1,4 +1,3 @@
-// lib/screens/home_page.dart
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
@@ -31,10 +30,9 @@ class _HomePageState extends State<HomePage> {
     bool allGranted = statuses.values.every((status) => status.isGranted);
 
     if (!allGranted) {
-      // If permissions are denied, show a dialog or a snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
+          content: const Text(
             'Bluetooth and Location permissions are required to use this feature.',
           ),
           action: SnackBarAction(
@@ -48,8 +46,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-    // Firebase Database references
     final DatabaseReference clientsRef = FirebaseDatabase.instance
         .ref()
         .child(Utils.getDatabasePath())
@@ -70,192 +66,53 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Dashboard'),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.logout),
-          //   onPressed: () async {
-          //     await authService.signOut(context);
-          //     Navigator.pushReplacementNamed(context, '/login');
-          //   },
-          //   tooltip: 'Sign Out',
-          // ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.pushNamed(context, '/settings'),
+            tooltip: 'Settings',
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                children: [
-                  // Total Clients Card
-                  StreamBuilder(
-                    stream: clientsRef.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const DashboardCard(
-                          title: "Total Clients",
-                          value: "Loading...",
-                          icon: Icons.people,
-                        );
-                      }
-
-                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-                        final clientsMap =
-                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-                        final int clientCount = clientsMap.length;
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/clients'),
-                          child: DashboardCard(
-                            title: "Total Clients",
-                            value: clientCount.toString(),
-                            icon: Icons.people,
-                          ),
-                        );
-                      } else {
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/clients'),
-                          child: DashboardCard(
-                            title: "Total Clients",
-                            value: "0",
-                            icon: Icons.people,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  // Total Deliveries Card
-                  StreamBuilder(
-                    stream: deliveriesRef.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const DashboardCard(
-                          title: "Total Deliveries",
-                          value: "Loading...",
-                          icon: Icons.delivery_dining,
-                        );
-                      }
-
-                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-                        final deliveriesMap =
-                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-                        final int deliveriesCount = deliveriesMap.length;
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/deliveries'),
-                          child: DashboardCard(
-                            title: "Total Deliveries",
-                            value: deliveriesCount.toString(),
-                            icon: Icons.delivery_dining,
-                          ),
-                        );
-                      } else {
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/deliveries'),
-                          child: DashboardCard(
-                            title: "Total Deliveries",
-                            value: "0",
-                            icon: Icons.delivery_dining,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  // Revenue Card
-                  StreamBuilder(
-                    stream: deliveriesRef.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const DashboardCard(
-                          title: "Revenue",
-                          value: "Loading...",
-                          icon: Icons.attach_money,
-                        );
-                      }
-
-                      if (snapshot.hasData &&
-                          snapshot.data!.snapshot.value != null) {
-                        final deliveriesMap = snapshot.data!.snapshot.value
-                        as Map<dynamic, dynamic>;
-                        double totalRevenue = 0.0;
-
-                        deliveriesMap.forEach((key, value) {
-                          final revenue =
-                          (value as Map<dynamic, dynamic>)['revenue'];
-                          if (revenue != null) {
-                            totalRevenue +=
-                                double.tryParse(revenue.toString()) ?? 0.0;
-                          }
-                        });
-
-                        return DashboardCard(
-                          title: "Revenue",
-                          value: "\$${totalRevenue.toStringAsFixed(2)}",
-                          icon: Icons.attach_money,
-                        );
-                      } else {
-                        return const DashboardCard(
-                          title: "Revenue",
-                          value: "\$0.00",
-                          icon: Icons.attach_money,
-                        );
-                      }
-                    },
-                  ),
-// Total Clients Card
-                  StreamBuilder(
-                    stream: productsRef.onValue,
-                    builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const DashboardCard(
-                          title: "Products",
-                          value: "Loading...",
-                          icon: Icons.shopping_cart,
-                        );
-                      }
-
-                      if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-                        final productsMap =
-                        snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-                        final int clientCount = productsMap.length;
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/products'),
-                          child: DashboardCard(
-                            title: "Products",
-                            value: clientCount.toString(),
-                            icon: Icons.inventory,
-                          ),
-                        );
-                      } else {
-                        return GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/products'),
-                          child: DashboardCard(
-                            title: "Products",
-                            value: "0",
-                            icon: Icons.inventory,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  // Settings Card
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/settings'),
-                    child: const DashboardCard(
-                      title: "Settings",
-                      value: "",
-                      icon: Icons.settings,
-                    ),
-                  ),
-                ],
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            shrinkWrap: true,
+            children: [
+              // Total Clients Card
+              _buildDashboardCard(
+                context: context,
+                stream: clientsRef.onValue,
+                title: "Total Clients",
+                icon: Icons.people,
+                onTap: () => Navigator.pushNamed(context, '/clients'),
               ),
-
-            ),
-          ],
+              // Total Deliveries Card
+              _buildDashboardCard(
+                context: context,
+                stream: deliveriesRef.onValue,
+                title: "Total Deliveries",
+                icon: Icons.delivery_dining,
+                onTap: () => Navigator.pushNamed(context, '/deliveries'),
+              ),
+              // Revenue Card
+              _buildRevenueCard(
+                context: context,
+                stream: deliveriesRef.onValue,
+              ),
+              // Products Card
+              _buildDashboardCard(
+                context: context,
+                stream: productsRef.onValue,
+                title: "Products",
+                icon: Icons.inventory,
+                onTap: () => Navigator.pushNamed(context, '/products'),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: ExpandableFab.location,
@@ -265,17 +122,13 @@ class _HomePageState extends State<HomePage> {
         children: [
           FloatingActionButton.small(
             heroTag: 'addClient',
-            onPressed: () {
-              Navigator.pushNamed(context, '/addClient');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/addClient'),
             tooltip: 'Add Client',
             child: const Icon(Icons.person_add),
           ),
           FloatingActionButton.small(
             heroTag: 'addBill',
-            onPressed: () {
-              Navigator.pushNamed(context, '/addBill');
-            },
+            onPressed: () => Navigator.pushNamed(context, '/addBill'),
             tooltip: 'Add Bill',
             child: const Icon(Icons.receipt_long),
           ),
@@ -289,6 +142,91 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDashboardCard({
+    required BuildContext context,
+    required Stream<DatabaseEvent> stream,
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return StreamBuilder(
+      stream: stream,
+      builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return DashboardCard(
+            title: title,
+            value: "Loading...",
+            icon: icon,
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+          final dataMap = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+          final int count = dataMap.length;
+          return GestureDetector(
+            onTap: onTap,
+            child: DashboardCard(
+              title: title,
+              value: count.toString(),
+              icon: icon,
+            ),
+          );
+        } else {
+          return GestureDetector(
+            onTap: onTap,
+            child: DashboardCard(
+              title: title,
+              value: "0",
+              icon: icon,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildRevenueCard({
+    required BuildContext context,
+    required Stream<DatabaseEvent> stream,
+  }) {
+    return StreamBuilder(
+      stream: stream,
+      builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const DashboardCard(
+            title: "Revenue",
+            value: "Loading...",
+            icon: Icons.attach_money,
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+          final dataMap = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+          double totalRevenue = 0.0;
+
+          dataMap.forEach((key, value) {
+            final revenue = (value as Map<dynamic, dynamic>)['revenue'];
+            if (revenue != null) {
+              totalRevenue += double.tryParse(revenue.toString()) ?? 0.0;
+            }
+          });
+
+          return DashboardCard(
+            title: "Revenue",
+            value: "\$${totalRevenue.toStringAsFixed(2)}",
+            icon: Icons.attach_money,
+          );
+        } else {
+          return const DashboardCard(
+            title: "Revenue",
+            value: "\$0.00",
+            icon: Icons.attach_money,
+          );
+        }
+      },
     );
   }
 }

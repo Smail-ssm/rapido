@@ -65,7 +65,7 @@ class _ClientsPageState extends State<ClientsPage> {
     setState(() {
       _filteredClients = _clients.where((client) {
         return client.name.toLowerCase().contains(query) ||
-            client.socialReason.toLowerCase().contains(query) ||
+            client.matriculeFiscal.toLowerCase().contains(query) ||
             client.contactNumber.contains(query);
       }).toList();
     });
@@ -77,14 +77,14 @@ class _ClientsPageState extends State<ClientsPage> {
       appBar: AppBar(
         title: _isSearching
             ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search by name, social reason, or phone',
-                  border: InputBorder.none,
-                ),
-                style: const TextStyle(color: Colors.black),
-              )
+          controller: _searchController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Search by name, matricule fiscal, or phone',
+            border: InputBorder.none,
+          ),
+          style: const TextStyle(color: Colors.white),
+        )
             : const Text('Clients'),
         actions: [
           IconButton(
@@ -115,16 +115,16 @@ class _ClientsPageState extends State<ClientsPage> {
 
           if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
             final Map<dynamic, dynamic> clientsMap =
-                snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+            snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
 
             _clients = clientsMap.entries
                 .map((entry) => Client.fromMap(entry.key, entry.value))
                 .toList();
 
             _filteredClients =
-                _filteredClients.isEmpty && _searchController.text.isEmpty
-                    ? _clients
-                    : _filteredClients;
+            _filteredClients.isEmpty && _searchController.text.isEmpty
+                ? _clients
+                : _filteredClients;
 
             if (_filteredClients.isEmpty) {
               return const Center(child: Text("No clients found."));
@@ -134,23 +134,40 @@ class _ClientsPageState extends State<ClientsPage> {
               itemCount: _filteredClients.length,
               itemBuilder: (context, index) {
                 final client = _filteredClients[index];
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SingleClientPage(client: client),
-                    ),
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: ClientItem(
-                    name: client.name,
-                    socialReason: client.socialReason,
-                    deliveriesCount: client.deliveriesCount,
+                  child: ListTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SingleClientPage(client: client),
+                      ),
+                    ),
+                    title: Text(
+                      client.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Matricule Fiscal: ${client.matriculeFiscal}'),
+                        Text('Contact: ${client.contactNumber}'),
+                        Text('Deliveries: ${client.deliveriesCount}'),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.blue),
                   ),
                 );
               },
             );
           } else {
-            // Show Snackbar and prompt to add a client if no clients found
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -158,8 +175,7 @@ class _ClientsPageState extends State<ClientsPage> {
                   duration: Duration(seconds: 3),
                 ),
               );
-              _showAddClientBottomSheet(
-                  context); // Automatically open Add Client form
+              _showAddClientBottomSheet(context);
             });
 
             return const Center(child: Text("No clients found."));

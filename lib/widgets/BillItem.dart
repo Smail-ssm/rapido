@@ -1,40 +1,82 @@
-// lib/widgets/bill_item.dart
 import 'package:flutter/material.dart';
 
 class BillItem extends StatelessWidget {
   final String date;
-  final double totalAmount; // Change to double
+  final double totalAmount;
   final String description;
   final VoidCallback onPrint;
-  final VoidCallback onTap; // Callback for item tap
+  final VoidCallback onTap;
 
   const BillItem({
     super.key,
     required this.date,
-    required this.totalAmount, // Use double type for totalAmount
+    required this.totalAmount,
     required this.description,
     required this.onPrint,
-    required this.onTap, // Pass onTap as a parameter
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap, // Trigger the onTap action when the item is clicked
+      onTap: onTap,
       child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        elevation: 3,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          title: Text('Date: $date'),
-          subtitle: Text('Amount: \$${totalAmount.toStringAsFixed(2)}\nDescription: $description'),
-          trailing: IconButton(
-            icon: const Icon(Icons.print),
-            color: Colors.blue,
-            tooltip: 'Print Bill',
-            onPressed: onPrint,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date
+              Text(
+                'Date: $date',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Total Amount
+              Text(
+                'Amount: \$${totalAmount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Description
+              Text(
+                'Description: $description',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Actions Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.print),
+                    color: Colors.blue,
+                    tooltip: 'Print Bill',
+                    onPressed: onPrint,
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: onTap,
+                    child: const Text('View Details'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

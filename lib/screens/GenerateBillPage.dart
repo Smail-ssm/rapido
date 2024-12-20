@@ -184,7 +184,7 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
-                      Text('Social Reason: ${widget.client.socialReason}'),
+                      Text('Social Reason: ${widget.client.matriculeFiscal}'),
                       Text('Contact Number: ${widget.client.contactNumber}'),
                       const SizedBox(height: 20),
                       TextField(

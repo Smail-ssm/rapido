@@ -1,9 +1,8 @@
-// lib/screens/single_client_page.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-   import '../model/Client.dart';
-import '../model/PrintedArticle.dart';
-import '../model/bill.dart';
+import '../model/Client.dart';
+import '../model/Bill.dart';
+import '../service/PrinterService.dart';
 import '../util/utils.dart';
 import '../widgets/BillHistoryItem.dart';
 import 'GenerateBillPage.dart';
@@ -20,7 +19,11 @@ class SingleClientPage extends StatefulWidget {
 
 class _SingleClientPageState extends State<SingleClientPage> {
   late final DatabaseReference _billsRef;
-  List<PrintedArticle> _bills = []; // Use List<PrintedArticle> type
+  final PrinterService _printerService = PrinterService();
+  List<Bill> _bills = [];
+  Future<void> _printBill(BuildContext context,bill) async {
+    await _printerService.printBill(context, bill); // Pass PrintedArticle directly
+  }
 
   @override
   void initState() {
@@ -40,29 +43,27 @@ class _SingleClientPageState extends State<SingleClientPage> {
 
     if (data != null) {
       final billsList = await Future.wait(data.entries.map((entry) async {
-        // Create BillItems from products list
-        final items = (entry.value['products'] as List<dynamic>? ?? []).map((product) {
+        final products = (entry.value['products'] as List<dynamic>? ?? []);
+        final items = products.map((product) {
           return BillItem(
-            name: product['name'] ?? '',
+            name: product['name'] ?? 'Unknown',
             quantity: (product['quantity'] ?? 1).toInt(),
-            unitPrice: (product['price'] ?? 0.0).toDouble(),
+            unitPrice: (product['unitPrice'] ?? 0.0).toDouble(),
+            remise: (product['remise'] ?? 0.0).toDouble(),
+            barcode: product['barcode'] ?? '',
           );
         }).toList();
 
-        // Create Bill object
-        final bill = Bill(
-          clientId: widget.client.id,
-          clientName: widget.client.name,
-          date: entry.value['date'] ?? '',
-          vendor: entry.value['vendor'] ?? '', // Example vendor name, adjust as needed
+        return await Bill.fromItems(
+          id: entry.value['id']?? '',
+          client: widget.client,
+           date: entry.value['date'] ?? '',
+          vendor: entry.value['vendor'] ?? 'Unknown Vendor',
           items: items,
+          description: entry.value['description'] ?? '',
         );
-
-        // Await the creation of PrintedArticle
-        return await PrintedArticle.fromBill(bill);
       }).toList());
 
-      // Update state with the result
       setState(() {
         _bills = billsList;
       });
@@ -100,7 +101,7 @@ class _SingleClientPageState extends State<SingleClientPage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch, // Make full width
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Display Client Info
                 Card(
@@ -116,10 +117,12 @@ class _SingleClientPageState extends State<SingleClientPage> {
                         Text(
                           widget.client.name,
                           style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
-                        Text('Social Reason: ${widget.client.socialReason}'),
+                        Text('Social Reason: ${widget.client.matriculeFiscal}'),
                         Text('Contact Number: ${widget.client.contactNumber}'),
                         Text('Address: ${widget.client.address}'),
                       ],
@@ -139,19 +142,20 @@ class _SingleClientPageState extends State<SingleClientPage> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _bills.length,
                   itemBuilder: (context, index) {
-                    final printedArticle = _bills[index];
+                    final bill = _bills[index];
                     return BillHistoryItem(
-                      date: printedArticle.bill.date,
-                      totalAmount: printedArticle.totalTTC,
-                      description: printedArticle.bill.clientName,
-                      vendor: printedArticle.bill.vendor, // Pass vendor name
-                      onPrint: () {}, // Add print function if needed
+                      date: bill.date,
+                      totalAmount: bill.totalTTC,
+                      description: bill.description,
+                      vendor: bill.vendor,
+                      onPrint: () {
+                         _printBill(context,bill) ;
+                      },
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                SingleBillPage(bill: printedArticle),
+                            builder: (context) => SingleBillPage(bill: bill),
                           ),
                         );
                       },

@@ -1,22 +1,29 @@
-// lib/screens/single_bill_page.dart
 import 'package:flutter/material.dart';
-
-import '../model/PrintedArticle.dart';
+import '../model/Bill.dart';
  import '../service/PrinterService.dart';
 
 class SingleBillPage extends StatelessWidget {
-  final PrintedArticle bill; // Changed from Map to PrintedArticle
+  final Bill bill;
   final PrinterService _printerService = PrinterService();
 
   SingleBillPage({super.key, required this.bill});
 
   Future<void> _printBill(BuildContext context) async {
-    await _printerService.printBill(context, bill); // Pass PrintedArticle directly
+    try {
+      await _printerService.printBill(context, bill);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bill printed successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to print bill: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final products = bill.bill.items; // Accessing items from Bill inside PrintedArticle
+    final List<BillItem> products = bill.items;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,46 +36,101 @@ class SingleBillPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Date: ${bill.bill.date}', // Access date from Bill inside PrintedArticle
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Bill Header
+            Card(
+              margin: const EdgeInsets.only(bottom: 20),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bill Date: ${bill.date}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Client: ${bill.client.name}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Total Amount: \$${bill.totalTTC.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Total Amount: \$${bill.totalTTC.toStringAsFixed(2)}', // Use totalTTC from PrintedArticle
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
+            // Products Section
             const Text(
               'Products',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 10),
+            const Divider(),
             products.isNotEmpty
-                ? Column(
-              children: products.map<Widget>((product) {
-                return ListTile(
-                  title: Text(product.name),
-                  subtitle: Text('Price: \$${product.unitPrice} x ${product.quantity}'),
-                  trailing: Text('Total: \$${product.total.toStringAsFixed(2)}'),
+                ? ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    title: Text(product.name),
+                    subtitle: Text(
+                      'Price: \$${product.unitPrice.toStringAsFixed(2)} x ${product.quantity}',
+                    ),
+                    trailing: Text(
+                      'Total: \$${product.total.toStringAsFixed(2)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 );
-              }).toList(),
+              },
             )
                 : const Center(
               child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('No products found in this bill.'),
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'No products found in this bill.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Description: ${bill.bill.clientName}', // Use client name as a placeholder description
-              style: const TextStyle(fontSize: 16),
+            // Additional Description
+            Card(
+              margin: const EdgeInsets.only(top: 20),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Additional Notes: ${bill.description ?? "No additional notes"}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
             ),
           ],
         ),

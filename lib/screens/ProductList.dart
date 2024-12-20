@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../model/Product.dart';
- import '../util/utils.dart';
-import '../widgets/AddProductForm.dart';
 import '../model/ProductItem.dart';
+import '../util/utils.dart';
+import '../widgets/AddProductForm.dart';
 import 'SingleProductPage.dart';
 
 class StockManagementPage extends StatefulWidget {
@@ -64,10 +64,12 @@ class _StockManagementPageState extends State<StockManagementPage> {
     setState(() {
       _filteredProducts = _products.where((product) {
         return product.name.toLowerCase().contains(query) ||
-            product.category.toLowerCase().contains(query);
+            product.category.toLowerCase().contains(query) ||
+            product.barcode.contains(query);
       }).toList();
     });
   }
+
   Future<void> _deleteProduct(Product product) async {
     try {
       await _productsRef.child(product.id).remove();
@@ -80,13 +82,14 @@ class _StockManagementPageState extends State<StockManagementPage> {
       );
     }
   }
+
   Future<void> _showDeleteDialog(Product product) async {
     final confirmDelete = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Product'),
-          content: Text('Are you sure you want to delete this product?'),
+          title: const Text('Delete Product'),
+          content: const Text('Are you sure you want to delete this product?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
@@ -105,6 +108,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
       _deleteProduct(product);
     }
   }
+
   Future<void> _openProductDetails(Product product) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -112,6 +116,7 @@ class _StockManagementPageState extends State<StockManagementPage> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,10 +126,10 @@ class _StockManagementPageState extends State<StockManagementPage> {
           controller: _searchController,
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Search by name or category',
+            hintText: 'Search by name, category, or barcode',
             border: InputBorder.none,
           ),
-          style: const TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.white),
         )
             : const Text('Stock Management'),
         actions: [
@@ -180,13 +185,13 @@ class _StockManagementPageState extends State<StockManagementPage> {
                   category: product.category,
                   quantity: product.quantity,
                   price: product.price,
+                  barcode: product.barcode,
                   onTap: () => _openProductDetails(product),
                   onLongPress: () => _showDeleteDialog(product),
                 );
               },
             );
           } else {
-            // Show Snackbar and prompt to add a product if no products found
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

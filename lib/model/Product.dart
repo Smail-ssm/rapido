@@ -5,7 +5,8 @@ class Product {
   final String category; // Product category
   final double price; // Price of the product
   final int quantity; // Quantity in stock
-   final DateTime addedDate; // Date the product was added
+  final DateTime addedDate; // Date the product was added
+  final String barcode; // Barcode of the product
   bool isSelected = false; // Track selection state
 
   Product({
@@ -15,9 +16,11 @@ class Product {
     required this.category,
     required this.price,
     required this.quantity,
-     required this.addedDate,
+    required this.addedDate,
+    required this.barcode,
   });
 
+  /// Factory constructor to create a `Product` object from a map.
   factory Product.fromMap(String id, Map<dynamic, dynamic> data) {
     return Product(
       id: id,
@@ -26,18 +29,45 @@ class Product {
       category: data['category'] as String,
       price: (data['price'] as num).toDouble(),
       quantity: data['quantity'] as int,
-       addedDate: DateTime.parse(data['addedDate'] as String),
+      addedDate: DateTime.parse(data['addedDate'] as String),
+      barcode: data['barcode'] as String,
     );
   }
 
+  /// Convert `Product` object to a map for serialization.
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'name': name,
       'description': description,
       'category': category,
       'price': price,
       'quantity': quantity,
-       'addedDate': addedDate.toIso8601String(),
+      'addedDate': addedDate.toIso8601String(),
+      'barcode': barcode,
     };
+  }
+
+  /// Update an existing `Product` object with new data while preserving unchanged fields.
+  Product copyWith({
+    String? name,
+    String? description,
+    String? category,
+    double? price,
+    int? quantity,
+    DateTime? addedDate,
+    String? barcode,
+    bool? isSelected,
+  }) {
+    return Product(
+      id: this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
+      addedDate: addedDate ?? this.addedDate,
+      barcode: barcode ?? this.barcode,
+    )..isSelected = isSelected ?? this.isSelected;
   }
 }

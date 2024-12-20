@@ -19,6 +19,7 @@ class _SingleProductPageState extends State<SingleProductPage> {
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _barcodeController = TextEditingController();
 
   @override
   void initState() {
@@ -28,36 +29,43 @@ class _SingleProductPageState extends State<SingleProductPage> {
     _categoryController.text = widget.product.category;
     _quantityController.text = widget.product.quantity.toString();
     _priceController.text = widget.product.price.toString();
+    _barcodeController.text = widget.product.barcode;
   }
 
   Future<void> _updateProduct() async {
-    // Get the new values from the form
-    final String name = _nameController.text.trim();
-    final String category = _categoryController.text.trim();
-    final int quantity = int.parse(_quantityController.text.trim());
-    final double price = double.parse(_priceController.text.trim());
+    try {
+      final String name = _nameController.text.trim();
+      final String category = _categoryController.text.trim();
+      final int quantity = int.parse(_quantityController.text.trim());
+      final double price = double.parse(_priceController.text.trim());
+      final String barcode = _barcodeController.text.trim();
 
-    // Update the product in the Firebase Realtime Database
-    await _productRef
-        .child(Utils.getDatabasePath())
-        .child('sari3')
-        .child('products')
-        .child(widget.product.id)  // Use the product's ID to update
-        .update({
-      'name': name,
-      'category': category,
-      'quantity': quantity,
-      'price': price,
-    }).then((_) {
+      if (name.isEmpty || category.isEmpty || barcode.isEmpty) {
+        throw Exception('Name, category, and barcode are required.');
+      }
+
+      await _productRef
+          .child(Utils.getDatabasePath())
+          .child('sari3')
+          .child('products')
+          .child(widget.product.id) // Use the product's ID to update
+          .update({
+        'name': name,
+        'category': category,
+        'quantity': quantity,
+        'price': price,
+        'barcode': barcode,
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Product updated successfully')),
       );
-      Navigator.pop(context); // Close the page after saving
-    }).catchError((error) {
+      Navigator.pop(context);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update product: $error')),
+        SnackBar(content: Text('Failed to update product: $e')),
       );
-    });
+    }
   }
 
   @override
@@ -68,37 +76,69 @@ class _SingleProductPageState extends State<SingleProductPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed: _updateProduct, // Save on button press
+            onPressed: _updateProduct,
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _categoryController,
-              decoration: const InputDecoration(labelText: 'Category'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _quantityController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Quantity'),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Price'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Edit Product Details',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _categoryController,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Quantity',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Price',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _barcodeController,
+                decoration: const InputDecoration(
+                  labelText: 'Barcode',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _updateProduct,
+                child: const Text('Save Changes'),
+              ),
+            ],
+          ),
         ),
       ),
     );
