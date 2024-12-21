@@ -4,12 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Bill {
   final String id;
   final Client client;
-   final String date;
+  final String date;
   final String vendor;
   final String description;
   final List<BillItem> items;
 
-  // Totals and counts
+  // Pre-calculated attributes
   final double totalHT; // Total excluding tax
   final double totalTVA; // Total tax
   final double totalTTC; // Total including tax
@@ -20,7 +20,7 @@ class Bill {
   Bill({
     required this.id,
     required this.client,
-     required this.date,
+    required this.date,
     required this.vendor,
     required this.items,
     required this.totalHT,
@@ -32,47 +32,6 @@ class Bill {
     required this.description,
   });
 
-  /// Factory constructor to create a `Bill` object from a list of `BillItem`s.
-  /// Automatically calculates totals, line count, and piece count.
-  factory Bill.fromItems({
-    required String id,
-    required Client client,
-     required String date,
-    required String vendor,
-    required String description,
-    required List<BillItem> items,
-    double? taxRate,
-  }) {
-    // Calculate totals
-    double totalHT = items.fold(0.0, (sum, item) => sum + item.total);
-    int lineCount = items.length;
-    int pieceCount = items.fold(0, (sum, item) => sum + item.quantity);
-
-    // Use the provided tax rate or fetch it from SharedPreferences
-    double effectiveTaxRate = taxRate ?? 0.15; // Default to 15%
-    double totalTVA = totalHT * effectiveTaxRate;
-    double totalTTC = totalHT + totalTVA;
-
-    // Placeholder for remaining balance, can be updated based on payments
-    double remainingBalance = totalTTC;
-
-    return Bill(
-      id: id,
-      client: client,
-       date: date,
-      vendor: vendor,
-      items: items,
-      totalHT: totalHT,
-      totalTVA: totalTVA,
-      totalTTC: totalTTC,
-      remainingBalance: remainingBalance,
-      lineCount: lineCount,
-      pieceCount: pieceCount,
-      description: description,
-    );
-  }
-
-
   /// Static method to fetch the tax rate from `SharedPreferences`.
   /// Returns a default tax rate of 15% if not set.
   static Future<double> fetchTaxRate() async {
@@ -82,23 +41,32 @@ class Bill {
 
   /// Factory async constructor to dynamically fetch and use the tax rate
   /// stored in `SharedPreferences`.
-  static Future<Bill> createWithDynamicTaxRate({
+  static Future<Bill> createWithPrecalculatedTotals({
     required String id,
     required Client client,
-    required String clientName,
     required String date,
-    required String description,
     required String vendor,
     required List<BillItem> items,
+    required String description,
+    required double totalHT,
+    required double totalTVA,
+    required double totalTTC,
+    required double remainingBalance,
+    required int lineCount,
+    required int pieceCount,
   }) async {
-    double taxRate = await fetchTaxRate();
-    return Bill.fromItems(
+    return Bill(
       id: id,
       client: client,
-       date: date,
+      date: date,
       vendor: vendor,
       items: items,
-      taxRate: taxRate,
+      totalHT: totalHT,
+      totalTVA: totalTVA,
+      totalTTC: totalTTC,
+      remainingBalance: remainingBalance,
+      lineCount: lineCount,
+      pieceCount: pieceCount,
       description: description,
     );
   }

@@ -156,10 +156,7 @@ class PrinterService {
           'Mode de Paiement: Espèce ${bill.totalTTC.toStringAsFixed(3)}',
           styles: const PosStyles(align: PosAlign.left));
       bytes += generator.hr();
-      bytes += generator.text(
-        'Powered by CLEDISS\nwww.clediss.com\nwww.nomadis.online',
-        styles: const PosStyles(align: PosAlign.center),
-      );
+      // !
       bytes += generator.feed(2);
       await _generatePdf(bill, profile);
 
@@ -239,10 +236,10 @@ class PrinterService {
                     pw.Text('REMISE',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold,fontSize: 8)),
                     // Discount
-                    pw.Text('MONTANT NET',
+                    pw.Text('NET',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold,fontSize: 8)),
                     // Net Amount
-                    pw.Text('MONTANT TTC',
+                    pw.Text('TTC',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold,fontSize: 8)),
                     // Total with Tax
                   ],

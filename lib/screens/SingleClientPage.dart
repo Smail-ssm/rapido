@@ -21,9 +21,6 @@ class _SingleClientPageState extends State<SingleClientPage> {
   late final DatabaseReference _billsRef;
   final PrinterService _printerService = PrinterService();
   List<Bill> _bills = [];
-  Future<void> _printBill(BuildContext context,bill) async {
-    await _printerService.printBill(context, bill); // Pass PrintedArticle directly
-  }
 
   @override
   void initState() {
@@ -42,9 +39,9 @@ class _SingleClientPageState extends State<SingleClientPage> {
     final data = event.snapshot.value as Map<dynamic, dynamic>?;
 
     if (data != null) {
-      final billsList = await Future.wait(data.entries.map((entry) async {
-        final products = (entry.value['products'] as List<dynamic>? ?? []);
-        final items = products.map((product) {
+      final billsList = data.entries.map((entry) {
+        final billData = entry.value as Map<dynamic, dynamic>;
+        final products = (billData['products'] as List<dynamic>? ?? []).map((product) {
           return BillItem(
             name: product['name'] ?? 'Unknown',
             quantity: (product['quantity'] ?? 1).toInt(),
@@ -54,15 +51,21 @@ class _SingleClientPageState extends State<SingleClientPage> {
           );
         }).toList();
 
-        return await Bill.fromItems(
-          id: entry.value['id']?? '',
+        return Bill(
+          id: entry.key,
           client: widget.client,
-           date: entry.value['date'] ?? '',
-          vendor: entry.value['vendor'] ?? 'Unknown Vendor',
-          items: items,
-          description: entry.value['description'] ?? '',
+          date: billData['date'] ?? '',
+          vendor: billData['vendor'] ?? '',
+          description: billData['description'] ?? '',
+          items: products,
+          totalHT: (billData['totalHT'] ?? 0.0).toDouble(),
+          totalTVA: (billData['totalTVA'] ?? 0.0).toDouble(),
+          totalTTC: (billData['totalTTC'] ?? 0.0).toDouble(),
+          remainingBalance: (billData['remainingBalance'] ?? 0.0).toDouble(),
+          lineCount: (billData['lineCount'] ?? 0).toInt(),
+          pieceCount: (billData['pieceCount'] ?? 0).toInt(),
         );
-      }).toList());
+      }).toList();
 
       setState(() {
         _bills = billsList;
@@ -72,6 +75,10 @@ class _SingleClientPageState extends State<SingleClientPage> {
         _bills = [];
       });
     }
+  }
+
+  Future<void> _printBill(BuildContext context, Bill bill) async {
+    await _printerService.printBill(context, bill); // Pass Bill directly
   }
 
   @override
@@ -149,13 +156,14 @@ class _SingleClientPageState extends State<SingleClientPage> {
                       description: bill.description,
                       vendor: bill.vendor,
                       onPrint: () {
-                         _printBill(context,bill) ;
+                        _printBill(context, bill);
                       },
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SingleBillPage(bill: bill),
+                            builder: (context) =>
+                                SingleBillPage(bill: bill),
                           ),
                         );
                       },
