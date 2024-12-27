@@ -39,9 +39,9 @@ class ProductDTO extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Quantity: $quantity'),
-              Text('Unit Price: \$${unitPrice.toStringAsFixed(2)}'),
-              Text('Remise: \$${remise.toStringAsFixed(2)}'),
-              Text('Total Price: \$${totalPrice.toStringAsFixed(2)}'),
+              Text('Unit Price:  ${unitPrice.toStringAsFixed(2)} Dt'),
+              Text('Remise:  ${remise.toStringAsFixed(2)} Dt'),
+              Text('Total Price:  ${totalPrice.toStringAsFixed(2)}  Dt'),
               Text('Barcode: $barcode'),
             ],
           ),

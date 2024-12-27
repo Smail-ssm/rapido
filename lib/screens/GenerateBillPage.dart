@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
 import '../model/Bill.dart';
 import '../model/Client.dart';
 import '../model/Product.dart';
@@ -58,6 +59,9 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
   }
 
   Future<void> _saveBill() async {
+    final billId =
+        await Utils.generateLocalBillId(); // Generate local auto-incremented ID
+
     // Create the BillItems
     final items = _selectedProductIds.map((id) {
       final product = _products.firstWhere((p) => p.id == id);
@@ -66,7 +70,7 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
         quantity: _selectedProductQuantities[id] ?? 1,
         unitPrice: product.price,
         remise: 0, // Assuming no discount for now
-        barcode: product.barcode ?? '',
+        barcode: product.barcode,
       );
     }).toList();
 
@@ -80,7 +84,7 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
 
     // Create the Bill object
     final bill = Bill(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: billId,
       client: widget.client,
       date: DateTime.now().toIso8601String(),
       vendor: _vendorController.text,
@@ -91,7 +95,6 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
       remainingBalance: remainingBalance,
       lineCount: lineCount,
       pieceCount: pieceCount,
-      description: 'Generated bill',
     );
 
     // Save the bill to Firebase
@@ -101,7 +104,6 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
       'clientName': bill.client.name,
       'date': bill.date,
       'vendor': bill.vendor,
-      'description': bill.description,
       'totalHT': bill.totalHT,
       'totalTVA': bill.totalTVA,
       'totalTTC': bill.totalTTC,
@@ -136,21 +138,12 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Generate Bill for ${widget.client.name}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveBill,
-            tooltip: 'Save Bill',
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 40),
             _buildClientInformationSection(),
             const Divider(height: 32),
             _buildProductListSection(),
@@ -167,17 +160,17 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.client.name,
+          'Nom : ${widget.client.name}',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        Text('Social Reason: ${widget.client.matriculeFiscal}'),
-        Text('Contact Number: ${widget.client.contactNumber}'),
+        Text('M.Fiscal: ${widget.client.matriculeFiscal}'),
+        Text('N° tel: ${widget.client.contactNumber}'),
         const SizedBox(height: 16),
         TextField(
           controller: _vendorController,
           decoration: const InputDecoration(
-            labelText: 'Vendor Name',
+            labelText: 'Vendeur',
             border: OutlineInputBorder(),
           ),
         ),
@@ -192,7 +185,7 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
         TextField(
           controller: _searchController,
           decoration: const InputDecoration(
-            labelText: 'Search Products',
+            labelText: 'Recherche Products',
             border: OutlineInputBorder(),
           ),
           onChanged: (query) {
@@ -275,7 +268,7 @@ class _GenerateBillPageState extends State<GenerateBillPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+          'Total Amount: ${totalAmount.toStringAsFixed(2)} DT',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),

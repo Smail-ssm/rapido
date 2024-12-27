@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class BillHistoryItem extends StatelessWidget {
   final String date;
   final double totalAmount;
-  final String description;
   final String vendor;
   final VoidCallback onPrint;
   final VoidCallback onTap;
@@ -12,7 +11,6 @@ class BillHistoryItem extends StatelessWidget {
     Key? key,
     required this.date,
     required this.totalAmount,
-    required this.description,
     required this.vendor,
     required this.onPrint,
     required this.onTap,
@@ -56,22 +54,14 @@ class BillHistoryItem extends StatelessWidget {
               const SizedBox(height: 8),
               // Total Amount
               Text(
-                'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+                'Total Amount: ${totalAmount.toStringAsFixed(2)} DT',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.green,
                 ),
               ),
-              const SizedBox(height: 8),
-              // Description
-              Text(
-                'Description: $description',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-              ),
+
               const SizedBox(height: 12),
               // Action Buttons
               Row(

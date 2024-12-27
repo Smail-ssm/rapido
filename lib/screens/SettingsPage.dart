@@ -178,7 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 10),
           ElevatedButton(
             onPressed: _adapterState == BluetoothAdapterState.on ? _startScan : null,
-            child: const Text('Search for Bluetooth Devices'),
+            child: const Text('Chercher imprimante'),
           ),
           const SizedBox(height: 20),
           _buildBluetoothScanResults(),
@@ -243,8 +243,8 @@ class _SettingsPageState extends State<SettingsPage> {
         const SizedBox(height: 10),
         ..._scanResults.map((result) {
           return ListTile(
-            title: Text(result.device.name.isNotEmpty
-                ? result.device.name
+            title: Text(result.device.platformName.isNotEmpty
+                ? result.device.platformName
                 : 'Unnamed Device'),
             subtitle: Text(result.device.remoteId.toString()),
             trailing: ElevatedButton(
@@ -270,8 +270,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 10),
         ListTile(
-          title: Text(_connectedDevice!.name.isNotEmpty
-              ? _connectedDevice!.name
+          title: Text(_connectedDevice!.platformName.isNotEmpty
+              ? _connectedDevice!.platformName
               : 'Unnamed Device'),
           subtitle: Text(_connectedDevice!.remoteId.toString()),
         ),

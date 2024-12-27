@@ -42,7 +42,7 @@ class ProductItem extends StatelessWidget {
             children: [
               Text('Category: $category'),
               Text('Quantity: $quantity'),
-              Text('Price: \$${price.toStringAsFixed(2)}'),
+              Text('Price: ${price.toStringAsFixed(2)}  Dt'),
               Text('Barcode: $barcode'),
             ],
           ),

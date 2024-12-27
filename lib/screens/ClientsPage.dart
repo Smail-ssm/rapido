@@ -1,10 +1,9 @@
-// lib/screens/clients_page.dart
-import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+
 import '../model/Client.dart';
 import '../util/utils.dart';
 import '../widgets/AddClientForm.dart';
-import '../widgets/ClientItem.dart';
 import 'SingleClientPage.dart';
 
 class ClientsPage extends StatefulWidget {
@@ -18,7 +17,6 @@ class _ClientsPageState extends State<ClientsPage> {
   late final DatabaseReference _clientsRef;
   List<Client> _clients = [];
   List<Client> _filteredClients = [];
-  bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -74,113 +72,124 @@ class _ClientsPageState extends State<ClientsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search by name, matricule fiscal, or phone',
-            border: InputBorder.none,
+      body: Column(
+        children: [
+          // Search Bar
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Recherche par nom, M.fiscal, or tel',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+              ),
+            ),
           ),
-          style: const TextStyle(color: Colors.white),
-        )
-            : const Text('Clients'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _filteredClients = _clients;
+
+          // Clients List
+          Expanded(
+            child: StreamBuilder(
+              stream: _clientsRef.onValue,
+              builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddClientBottomSheet(context),
-            tooltip: 'Add Client',
+
+                if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                  final Map<dynamic, dynamic> clientsMap =
+                      snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+
+                  _clients = clientsMap.entries
+                      .map((entry) => Client.fromMap(entry.key, entry.value))
+                      .toList();
+
+                  _filteredClients =
+                      _filteredClients.isEmpty && _searchController.text.isEmpty
+                          ? _clients
+                          : _filteredClients;
+
+                  if (_filteredClients.isEmpty) {
+                    return const Center(child: Text("No clients found."));
+                  }
+
+                  return ListView.builder(
+                    itemCount: _filteredClients.length,
+                    itemBuilder: (context, index) {
+                      final client = _filteredClients[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ListTile(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  SingleClientPage(client: client),
+                            ),
+                          ),
+                          title: Text(
+                            client.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  'Matricule Fiscal: ${client.matriculeFiscal}'),
+                              Text('Contact: ${client.contactNumber}'),
+                            ],
+                          ),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.blue),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("No clients found. Please add a client."),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    _showAddClientBottomSheet(context);
+                  });
+
+                  return const Center(child: Text("No clients found."));
+                }
+              },
+            ),
           ),
         ],
       ),
-      body: StreamBuilder(
-        stream: _clientsRef.onValue,
-        builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
-          if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            final Map<dynamic, dynamic> clientsMap =
-            snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-
-            _clients = clientsMap.entries
-                .map((entry) => Client.fromMap(entry.key, entry.value))
-                .toList();
-
-            _filteredClients =
-            _filteredClients.isEmpty && _searchController.text.isEmpty
-                ? _clients
-                : _filteredClients;
-
-            if (_filteredClients.isEmpty) {
-              return const Center(child: Text("No clients found."));
-            }
-
-            return ListView.builder(
-              itemCount: _filteredClients.length,
-              itemBuilder: (context, index) {
-                final client = _filteredClients[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: ListTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SingleClientPage(client: client),
-                      ),
-                    ),
-                    title: Text(
-                      client.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Matricule Fiscal: ${client.matriculeFiscal}'),
-                        Text('Contact: ${client.contactNumber}'),
-                        Text('Deliveries: ${client.deliveriesCount}'),
-                      ],
-                    ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.blue),
-                  ),
-                );
-              },
-            );
-          } else {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("No clients found. Please add a client."),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-              _showAddClientBottomSheet(context);
-            });
-
-            return const Center(child: Text("No clients found."));
-          }
-        },
+      // FAB for adding a client
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddClientBottomSheet(context),
+        tooltip: 'Add Client',
+        child: const Icon(Icons.add),
       ),
     );
   }

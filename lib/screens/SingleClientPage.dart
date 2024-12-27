@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../model/Client.dart';
+import 'package:flutter/material.dart';
+
 import '../model/Bill.dart';
+import '../model/Client.dart';
 import '../service/PrinterService.dart';
 import '../util/utils.dart';
 import '../widgets/BillHistoryItem.dart';
@@ -56,7 +57,6 @@ class _SingleClientPageState extends State<SingleClientPage> {
           client: widget.client,
           date: billData['date'] ?? '',
           vendor: billData['vendor'] ?? '',
-          description: billData['description'] ?? '',
           items: products,
           totalHT: (billData['totalHT'] ?? 0.0).toDouble(),
           totalTVA: (billData['totalTVA'] ?? 0.0).toDouble(),
@@ -78,108 +78,105 @@ class _SingleClientPageState extends State<SingleClientPage> {
   }
 
   Future<void> _printBill(BuildContext context, Bill bill) async {
-    await _printerService.printBill(context, bill); // Pass Bill directly
+    await _printerService.printBill(context, bill);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.client.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GenerateBillPage(client: widget.client),
+      body: Column(
+        children: [
+          const SizedBox(height: 40),
+          RefreshIndicator(
+            onRefresh: _fetchBills,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.client.name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text('M.Fiscal: ${widget.client.matriculeFiscal}'),
+                            Text('N° tel: ${widget.client.contactNumber}'),
+                            Text('Address: ${widget.client.address}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Bill History',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    _bills.isNotEmpty
+                        ? ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _bills.length,
+                            itemBuilder: (context, index) {
+                              final bill = _bills[index];
+                              return BillHistoryItem(
+                                date: bill.date,
+                                totalAmount: bill.totalTTC,
+                                vendor: bill.vendor,
+                                onPrint: () {
+                                  _printBill(context, bill);
+                                },
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SingleBillPage(bill: bill),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        : const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('No bills found.'),
+                            ),
+                          ),
+                  ],
                 ),
-              );
-            },
-            tooltip: 'Generate Bill',
+              ),
+            ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchBills,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Display Client Info
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.client.name,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Social Reason: ${widget.client.matriculeFiscal}'),
-                        Text('Contact Number: ${widget.client.contactNumber}'),
-                        Text('Address: ${widget.client.address}'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Display List of Bills
-                const Text(
-                  'Bill History',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                _bills.isNotEmpty
-                    ? ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _bills.length,
-                  itemBuilder: (context, index) {
-                    final bill = _bills[index];
-                    return BillHistoryItem(
-                      date: bill.date,
-                      totalAmount: bill.totalTTC,
-                      description: bill.description,
-                      vendor: bill.vendor,
-                      onPrint: () {
-                        _printBill(context, bill);
-                      },
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                SingleBillPage(bill: bill),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                )
-                    : const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('No bills found.'),
-                  ),
-                ),
-              ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GenerateBillPage(client: widget.client),
             ),
-          ),
-        ),
+          );
+        },
+        tooltip: 'Generate Bill',
+        child: const Icon(Icons.add),
       ),
     );
   }

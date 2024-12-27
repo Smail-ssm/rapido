@@ -42,7 +42,7 @@ class BillItem extends StatelessWidget {
               const SizedBox(height: 8),
               // Total Amount
               Text(
-                'Amount: \$${totalAmount.toStringAsFixed(2)}',
+                'Amount: ${totalAmount.toStringAsFixed(2)} Dt',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

@@ -6,7 +6,6 @@ class Bill {
   final Client client;
   final String date;
   final String vendor;
-  final String description;
   final List<BillItem> items;
 
   // Pre-calculated attributes
@@ -29,7 +28,6 @@ class Bill {
     required this.remainingBalance,
     required this.lineCount,
     required this.pieceCount,
-    required this.description,
   });
 
   /// Static method to fetch the tax rate from `SharedPreferences`.
@@ -67,7 +65,6 @@ class Bill {
       remainingBalance: remainingBalance,
       lineCount: lineCount,
       pieceCount: pieceCount,
-      description: description,
     );
   }
 }

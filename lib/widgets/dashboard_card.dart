@@ -14,6 +14,13 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the current brightness (light or dark mode)
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Set dynamic text colors based on the current theme
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final iconColor = isDarkMode ? Colors.white : Colors.blueAccent;
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -28,28 +35,28 @@ class DashboardCard extends StatelessWidget {
             // Icon
             CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.blueAccent.withOpacity(0.1),
-              child: Icon(icon, size: 30, color: Colors.blueAccent),
+              backgroundColor: iconColor.withOpacity(0.1),
+              child: Icon(icon, size: 30, color: iconColor),
             ),
             const SizedBox(height: 12),
             // Title
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: textColor,
               ),
             ),
             const SizedBox(height: 8),
             // Value
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
+                color: iconColor,
               ),
             ),
           ],

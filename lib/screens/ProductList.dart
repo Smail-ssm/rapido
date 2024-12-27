@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+
 import '../model/Product.dart';
 import '../model/ProductItem.dart';
 import '../util/utils.dart';
@@ -17,7 +18,6 @@ class _StockManagementPageState extends State<StockManagementPage> {
   late final DatabaseReference _productsRef;
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
-  bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -120,91 +120,85 @@ class _StockManagementPageState extends State<StockManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search by name, category, or barcode',
-            border: InputBorder.none,
+      body: Column(
+        children: [
+          const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by name, category, or barcode',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                prefixIcon: const Icon(Icons.search),
+              ),
+            ),
           ),
-          style: const TextStyle(color: Colors.white),
-        )
-            : const Text('Stock Management'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _filteredProducts = _products;
+          Expanded(
+            child: StreamBuilder(
+              stream: _productsRef.onValue,
+              builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddProductBottomSheet(context),
-            tooltip: 'Add Product',
+
+                if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                  final Map<dynamic, dynamic> productsMap =
+                      snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+
+                  _products = productsMap.entries
+                      .map((entry) => Product.fromMap(entry.key, entry.value))
+                      .toList();
+
+                  _filteredProducts = _filteredProducts.isEmpty &&
+                          _searchController.text.isEmpty
+                      ? _products
+                      : _filteredProducts;
+
+                  if (_filteredProducts.isEmpty) {
+                    return const Center(child: Text("No products found."));
+                  }
+
+                  return ListView.builder(
+                    itemCount: _filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredProducts[index];
+                      return ProductItem(
+                        name: product.name,
+                        category: product.category,
+                        quantity: product.quantity,
+                        price: product.price,
+                        barcode: product.barcode,
+                        onTap: () => _openProductDetails(product),
+                        onLongPress: () => _showDeleteDialog(product),
+                      );
+                    },
+                  );
+                } else {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text("No products found. Please add a product."),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    _showAddProductBottomSheet(context);
+                  });
+
+                  return const Center(child: Text("No products found."));
+                }
+              },
+            ),
           ),
         ],
       ),
-      body: StreamBuilder(
-        stream: _productsRef.onValue,
-        builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-            final Map<dynamic, dynamic> productsMap =
-            snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-
-            _products = productsMap.entries
-                .map((entry) => Product.fromMap(entry.key, entry.value))
-                .toList();
-
-            _filteredProducts =
-            _filteredProducts.isEmpty && _searchController.text.isEmpty
-                ? _products
-                : _filteredProducts;
-
-            if (_filteredProducts.isEmpty) {
-              return const Center(child: Text("No products found."));
-            }
-
-            return ListView.builder(
-              itemCount: _filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = _filteredProducts[index];
-                return ProductItem(
-                  name: product.name,
-                  category: product.category,
-                  quantity: product.quantity,
-                  price: product.price,
-                  barcode: product.barcode,
-                  onTap: () => _openProductDetails(product),
-                  onLongPress: () => _showDeleteDialog(product),
-                );
-              },
-            );
-          } else {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("No products found. Please add a product."),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-              _showAddProductBottomSheet(context);
-            });
-
-            return const Center(child: Text("No products found."));
-          }
-        },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddProductBottomSheet(context),
+        tooltip: 'Add Product',
+        child: const Icon(Icons.add),
       ),
     );
   }

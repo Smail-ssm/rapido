@@ -1,11 +1,16 @@
+import 'package:Rappido/screens/BillsPage.dart';
 import 'package:Rappido/screens/ClientsPage.dart';
 import 'package:Rappido/screens/HomePage.dart';
-import 'package:Rappido/screens/SettingsPage.dart';
 import 'package:Rappido/screens/ProductList.dart';
+import 'package:Rappido/screens/SettingsPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
+
+// Global ThemeMode notifier
+final ValueNotifier<ThemeMode> themeModeNotifier =
+    ValueNotifier(ThemeMode.system);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensures Flutter bindings are initialized
@@ -20,12 +25,23 @@ class RapidoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Rapido',
-      debugShowCheckedModeBanner: false, // Removes the debug banner
-      theme: _buildThemeData(), // Custom theme
-      initialRoute: '/home',
-      routes: _buildRoutes(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, ThemeMode currentMode, child) {
+        return MaterialApp(
+          title: 'Rapido',
+          debugShowCheckedModeBanner: false,
+          // Removes the debug banner
+          theme: _buildLightTheme(),
+          // Light theme
+          darkTheme: _buildDarkTheme(),
+          // Dark theme
+          themeMode: currentMode,
+          // Dynamically switch between light and dark
+          initialRoute: '/home',
+          routes: _buildRoutes(),
+        );
+      },
     );
   }
 
@@ -36,11 +52,12 @@ class RapidoApp extends StatelessWidget {
       '/settings': (context) => const SettingsPage(),
       '/products': (context) => const StockManagementPage(),
       '/home': (context) => const HomePage(),
+      '/BillsPage': (context) => const BillsPage(),
     };
   }
 
-  // Define a custom theme for the app
-  ThemeData _buildThemeData() {
+  // Light Theme
+  ThemeData _buildLightTheme() {
     return ThemeData(
       primarySwatch: Colors.blue,
       brightness: Brightness.light,
@@ -83,6 +100,57 @@ class RapidoApp extends StatelessWidget {
         bodyLarge: TextStyle(
           fontSize: 14,
           color: Colors.black54,
+        ),
+      ),
+    );
+  }
+
+  // Dark Theme
+  ThemeData _buildDarkTheme() {
+    return ThemeData(
+      primarySwatch: Colors.blueGrey,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: Colors.black,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.blueGrey,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      cardTheme: CardTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: Colors.grey[850],
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          backgroundColor: Colors.blueGrey,
+        ),
+      ),
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white70,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 14,
+          color: Colors.white54,
         ),
       ),
     );

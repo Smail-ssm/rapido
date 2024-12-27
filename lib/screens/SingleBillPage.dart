@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../model/Bill.dart';
- import '../service/PrinterService.dart';
+import '../service/PrinterService.dart';
 
 class SingleBillPage extends StatelessWidget {
   final Bill bill;
@@ -26,22 +27,14 @@ class SingleBillPage extends StatelessWidget {
     final List<BillItem> products = bill.items;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Bill Details'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.print),
-            onPressed: () => _printBill(context),
-            tooltip: 'Print Bill',
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Bill Header
+            const SizedBox(height: 40),
+
             Card(
               margin: const EdgeInsets.only(bottom: 20),
               elevation: 4,
@@ -64,7 +57,7 @@ class SingleBillPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Total Amount: \$${bill.totalTTC.toStringAsFixed(2)}',
+                      'Total Amount:  ${bill.totalTTC.toStringAsFixed(2)} DT',
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.green,
@@ -97,11 +90,11 @@ class SingleBillPage extends StatelessWidget {
                   child: ListTile(
                     title: Text(product.name),
                     subtitle: Text(
-                      'Price: \$${product.unitPrice.toStringAsFixed(2)} x ${product.quantity}',
-                    ),
+                            'Price: ${product.unitPrice.toStringAsFixed(2)} x ${product.quantity}  DT',
+                          ),
                     trailing: Text(
-                      'Total: \$${product.total.toStringAsFixed(2)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                            'Total:  ${product.total.toStringAsFixed(2)} DT',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 );
@@ -124,16 +117,15 @@ class SingleBillPage extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Additional Notes: ${bill.description ?? "No additional notes"}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
             ),
           ],
         ),
+      ),
+      // FAB for printing the bill
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _printBill(context),
+        tooltip: 'Print Bill',
+        child: const Icon(Icons.print),
       ),
     );
   }

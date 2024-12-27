@@ -94,12 +94,12 @@ class _AddClientFormState extends State<AddClientForm> {
             TextFormField(
               controller: _contactNumberController,
               decoration: const InputDecoration(
-                labelText: 'Contact Number',
+                labelText: 'N° tel',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.phone,
               validator: (value) =>
-              value!.isEmpty ? 'Please enter the contact number' : null,
+                  value!.isEmpty ? 'Please enter the N° tel' : null,
             ),
             const SizedBox(height: 20),
             ElevatedButton(

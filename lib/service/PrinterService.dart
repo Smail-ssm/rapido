@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:firebase_database/firebase_database.dart'; // Firebase for profile fetching
+import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:firebase_database/firebase_database.dart'; // Firebase for profile fetching
-import 'dart:io';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+
 import '../model/Bill.dart';
 import '../util/utils.dart';
 
@@ -185,7 +187,7 @@ class PrinterService {
                 // Header Section (User Profile Information)
                 pw.Center(
                   child: pw.Text(
-                    profile['companyName'] ?? 'COMPANY NAME',
+                    profile['companyName'] ?? 'Company Name',
                     style: pw.TextStyle(
                         fontSize: 18, fontWeight: pw.FontWeight.bold),
                   ),
@@ -320,13 +322,6 @@ class PrinterService {
                 pw.Text(
                     'Mode de Paiement: Espece ${bill.totalTTC.toStringAsFixed(3)}'),
                 pw.Divider(),
-                pw.Center(
-                  child: pw.Text(
-                    'Powered by CLEDISS\nwww.clediss.com\nwww.nomadis.online',
-                    textAlign: pw.TextAlign.center,
-                    style: const pw.TextStyle(fontSize: 8),
-                  ),
-                ),
               ],
             ),
           );
